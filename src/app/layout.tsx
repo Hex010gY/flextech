@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'react-hot-toast';
 import '@/styles/globals.css';
 
-const geistSans = Geist({
+const inter = Inter({
   variable: '--font-geist-sans',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
   display: 'swap',
@@ -50,7 +50,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <Toaster
