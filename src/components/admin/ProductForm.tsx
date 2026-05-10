@@ -227,7 +227,7 @@ export default function ProductForm({ categories, product }: ProductFormProps) {
           ].map(({ key, label, placeholder }) => (
             <div key={key}>
               <label className="input-label">{label}</label>
-              <input className="input" value={(form as Record<string, string>)[key]} onChange={(e) => set(key, e.target.value)} placeholder={placeholder} />
+              <input className="input" value={(form as unknown as Record<string, string>)[key]} onChange={(e) => set(key, e.target.value)} placeholder={placeholder} />
             </div>
           ))}
         </div>
