@@ -1,0 +1,16 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f1f5f9"/>
+  <!-- Laptop body -->
+  <rect x="100" y="80" width="200" height="130" rx="8" fill="#cbd5e1"/>
+  <rect x="108" y="88" width="184" height="114" rx="4" fill="#1e293b"/>
+  <!-- Screen content -->
+  <rect x="120" y="98" width="160" height="94" rx="3" fill="#334155"/>
+  <circle cx="200" cy="145" r="20" fill="#3b82f6" opacity="0.6"/>
+  <rect x="185" y="138" width="30" height="14" rx="3" fill="#60a5fa"/>
+  <!-- Keyboard base -->
+  <path d="M80 210 L90 210 L95 220 L305 220 L310 210 L320 210 L320 225 Q320 235 310 235 L90 235 Q80 235 80 225 Z" fill="#94a3b8"/>
+  <!-- Camera dot -->
+  <circle cx="200" cy="92" r="2.5" fill="#475569"/>
+  <!-- Logo text -->
+  <text x="200" y="270" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="#94a3b8" text-anchor="middle">Flex Computers</text>
+</svg>
