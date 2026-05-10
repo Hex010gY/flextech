@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Laptop, Eye, EyeOff, LogIn } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
@@ -11,7 +10,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
-  const router = useRouter();
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -27,20 +25,21 @@ export default function AdminLoginPage() {
     }
 
     toast.success('Welcome back!');
-    router.push('/admin/dashboard');
-    router.refresh();
+
+    // Use full page reload so the session cookie is picked up by middleware
+    setTimeout(() => {
+      window.location.href = '/admin/dashboard';
+    }, 500);
   };
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-400/5 rounded-full blur-[100px]" />
       </div>
 
       <div className="relative w-full max-w-md">
-        {/* Card */}
         <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
@@ -100,7 +99,7 @@ export default function AdminLoginPage() {
               ) : (
                 <LogIn className="w-4 h-4" />
               )}
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? 'Redirecting…' : 'Sign In'}
             </button>
           </form>
         </div>
