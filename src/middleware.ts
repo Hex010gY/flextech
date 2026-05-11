@@ -5,9 +5,7 @@ type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
   const supabase = createServerClient(
@@ -28,22 +26,18 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // IMPORTANT: getUser() refreshes the session and sets cookies
-  const { data: { user } } = await supabase.auth.getUser();
+  // Use getSession() — reads cookie directly without network call
+  const { data: { session } } = await supabase.auth.getSession();
 
   const isLoginPage = request.nextUrl.pathname === '/admin/login';
   const isDashboard = request.nextUrl.pathname.startsWith('/admin/dashboard');
 
-  // Protect dashboard — redirect to login if no session
-  if (isDashboard && !user) {
-    const loginUrl = new URL('/admin/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  if (isDashboard && !session) {
+    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // Already logged in — redirect away from login page
-  if (isLoginPage && user) {
-    const dashUrl = new URL('/admin/dashboard', request.url);
-    return NextResponse.redirect(dashUrl);
+  if (isLoginPage && session) {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
 
   return response;
