@@ -10,12 +10,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPwd,  setShowPwd]  = useState(false);
   const [loading,  setLoading]  = useState(false);
-  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -24,15 +24,17 @@ export default function AdminLoginPage() {
       return;
     }
 
-    if (data.session) {
-      toast.success('Welcome back!');
-      // Small delay to ensure cookie is written, then hard navigate
-      await new Promise(r => setTimeout(r, 800));
-      window.location.replace('/admin/dashboard');
-    } else {
-      toast.error('No session returned. Please try again.');
+    if (!data.session) {
+      toast.error('Login failed — no session. Check your credentials.');
       setLoading(false);
+      return;
     }
+
+    toast.success('Welcome back!');
+
+    // Wait for cookie to be written then hard navigate
+    await new Promise(r => setTimeout(r, 1000));
+    window.location.replace('/admin/dashboard');
   };
 
   return (
@@ -100,7 +102,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
         </div>
-
         <p className="text-center text-slate-600 text-xs mt-4">
           Flex Computers Admin Panel · Restricted Access
         </p>
