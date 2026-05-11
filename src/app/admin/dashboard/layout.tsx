@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
-  Laptop, LayoutDashboard, Package, Tag, LogOut, Menu, X, Sun, Moon, ChevronRight,
+  Laptop, LayoutDashboard, Package, Tag, LogOut, Menu, Sun, Moon, ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -19,21 +19,43 @@ const navItems = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [checking, setChecking] = useState(true);
   const pathname  = usePathname();
-  const router    = useRouter();
-  const supabase  = createClient();
   const { theme, setTheme } = useTheme();
+  const supabase  = createClient();
+
+  // Client-side auth protection
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.replace('/admin/login');
+      } else {
+        setChecking(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success('Logged out');
-    router.push('/admin/login');
-    router.refresh();
+    window.location.replace('/admin/login');
   };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-slate-400 text-sm">Verifying session…</p>
+        </div>
+      </div>
+    );
+  }
 
   const SidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-slate-200 dark:border-slate-700/50">
         <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
           <Laptop className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
@@ -43,7 +65,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </span>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -67,7 +88,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
 
-      {/* Bottom actions */}
       <div className="px-3 py-4 border-t border-slate-200 dark:border-slate-700/50 space-y-1">
         <button
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -89,12 +109,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden">
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 bg-white dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-700/50 shrink-0">
         {SidebarContent}
       </aside>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="w-56 bg-white dark:bg-slate-800 shadow-2xl">{SidebarContent}</div>
@@ -102,9 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
-      {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
         <header className="h-16 bg-white dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700/50 flex items-center justify-between px-4 sm:px-6 shrink-0">
           <div className="flex items-center gap-3">
             <button
@@ -118,16 +134,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {pathname.split('/').pop()?.replace(/-/g, ' ') || 'Dashboard'}
             </h2>
           </div>
-          <Link
-            href="/"
-            target="_blank"
-            className="text-xs text-slate-400 hover:text-blue-600 transition-colors"
-          >
+          <Link href="/" target="_blank" className="text-xs text-slate-400 hover:text-blue-600 transition-colors">
             View Store →
           </Link>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
