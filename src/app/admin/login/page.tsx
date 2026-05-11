@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       toast.error(error.message);
@@ -24,12 +24,15 @@ export default function AdminLoginPage() {
       return;
     }
 
-    toast.success('Welcome back!');
-
-    // Use full page reload so the session cookie is picked up by middleware
-    setTimeout(() => {
-      window.location.href = '/admin/dashboard';
-    }, 500);
+    if (data.session) {
+      toast.success('Welcome back!');
+      // Small delay to ensure cookie is written, then hard navigate
+      await new Promise(r => setTimeout(r, 800));
+      window.location.replace('/admin/dashboard');
+    } else {
+      toast.error('No session returned. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,21 +44,17 @@ export default function AdminLoginPage() {
 
       <div className="relative w-full max-w-md">
         <div className="bg-slate-800/80 backdrop-blur border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-          {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-brand mb-3">
+            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-3">
               <Laptop className="w-6 h-6 text-white" strokeWidth={2.5} />
             </div>
             <h1 className="text-xl font-bold text-white">FLEX COMPUTERS</h1>
             <p className="text-slate-400 text-sm mt-1">Admin Dashboard</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
               <input
                 type="email"
                 required
@@ -67,9 +66,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
@@ -99,7 +96,7 @@ export default function AdminLoginPage() {
               ) : (
                 <LogIn className="w-4 h-4" />
               )}
-              {loading ? 'Redirecting…' : 'Sign In'}
+              {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
         </div>
