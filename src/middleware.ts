@@ -4,7 +4,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 type CookieToSet = { name: string; value: string; options?: CookieOptions };
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,44 +19,36 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: CookieToSet[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            response.cookies.set(name, value, options);
+          });
         },
       },
     }
   );
 
-  // Refresh session if expired
+  // IMPORTANT: getUser() refreshes the session and sets cookies
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect admin routes (except login page)
-  if (
-    request.nextUrl.pathname.startsWith('/admin/dashboard') &&
-    !user
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/admin/login';
-    return NextResponse.redirect(url);
+  const isLoginPage = request.nextUrl.pathname === '/admin/login';
+  const isDashboard = request.nextUrl.pathname.startsWith('/admin/dashboard');
+
+  // Protect dashboard — redirect to login if no session
+  if (isDashboard && !user) {
+    const loginUrl = new URL('/admin/login', request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in admin away from login page
-  if (request.nextUrl.pathname === '/admin/login' && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/admin/dashboard';
-    return NextResponse.redirect(url);
+  // Already logged in — redirect away from login page
+  if (isLoginPage && user) {
+    const dashUrl = new URL('/admin/dashboard', request.url);
+    return NextResponse.redirect(dashUrl);
   }
 
-  return supabaseResponse;
+  return response;
 }
 
 export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/api/:path*',
-  ],
+  matcher: ['/admin/:path*'],
 };
