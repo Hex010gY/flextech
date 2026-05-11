@@ -18,8 +18,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://flextech-sand.vercel.app'),
-  title: { default: 'Flex Computers — Premium Laptops & Accessories', template: '%s | Flex Computers' },
-  description: 'Flex Computers offers the best selection of laptops and accessories.',
+  title: { default: 'Flex Computers — Premium Laptops & Accessories in Sudan', template: '%s | Flex Computers' },
+  description: 'Discover the best laptops and computing accessories at Flex Computers, Sudan. Gaming, business, and student laptops from top brands.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
